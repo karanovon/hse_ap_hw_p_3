@@ -1,33 +1,31 @@
-# Используем официальный образ Python 3.13
-FROM python:3.13-slim-bookworm
+FROM python:3.11-slim
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем системные зависимости (если нужны)
-# Для aiosqlite дополнительные пакеты не требуются
+# Устанавливаем минимальные системные зависимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Копируем зависимости
+# Копируем только зависимости сначала (для кэширования)
 COPY requirements.txt .
 
-# Устанавливаем зависимости
+# Устанавливаем зависимости с явным указанием платформы
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir --platform manylinux2014_x86_64 -r requirements.txt
 
-# Копируем код приложения
+# Копируем остальной код
 COPY . .
 
-# Создаем директорию для данных
-RUN mkdir -p /app/data
+# Создаем папку для данных с правильными правами
+RUN mkdir -p /app/data && chmod 777 /app/data
 
-# Даем права на запись в директорию данных
-RUN chmod 777 /app/data
+# Проверяем, что все необходимые файлы на месте
+RUN ls -la && ls -la /app/data || true
 
-# Открываем порт
+# Указываем порт
 EXPOSE 8000
 
-# Команда для запуска
+# Запускаем приложение
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
