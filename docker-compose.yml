@@ -2,23 +2,12 @@ version: '3.8'
 
 services:
   url-shortener:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: url-shortener-app
     ports:
       - "8000:8000"
     volumes:
-      # Монтируем код для разработки (с автообновлением)
-      - ./:/app
-      # Сохраняем базу данных на хосте
       - ./data:/app/data
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHON_VERSION=3.13
-      - TZ=UTC
-    # Для разработки с автообновлением
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-    # Для продакшена (без автообновления)
-    # command: uvicorn main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
