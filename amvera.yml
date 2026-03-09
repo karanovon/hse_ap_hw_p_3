@@ -1,0 +1,13 @@
+meta:
+  environment: python
+  name: url-shortener
+  version: 1.0.0
+
+run:
+  containerPort: 8000
+  command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+build:
+  dependencies:
+    - python=3.11
+  requirementsPath: requirements.txt
